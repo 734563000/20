@@ -44,7 +44,6 @@ while flag:
         else:
             balance = int(salary)
             break
-    # 打印菜单
     while flag:
         print('menu star'.center(24, '*'))
         print('No.', 'Name  ', '\t\t', 'Price')
@@ -56,9 +55,10 @@ while flag:
             print('You have already bought %s,balance is %s' %(shop_car,balance))
             flag = False
             break
-        if  not choice.isdigit():
+        if not choice.isdigit():
             print('Please enter the correct NO.')
             continue
+        #用户输入的数字是否在列表内
         choice = int(choice)
         if choice not in list_num:
             print('Please enter the correct NO.')
@@ -83,5 +83,3 @@ while flag:
             balance = balance - order
             shop_car.append(( msg_dic[choice][0].strip('\t'),choice_num))
             print('Purchase success! %s,Your balance is %d'%(shop_car,balance))
-
-
