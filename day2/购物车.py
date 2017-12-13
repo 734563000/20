@@ -50,11 +50,14 @@ while flag:
         for i in msg_dic:
             print(msg_dic.index(i), ' ', i[0], '\t', i[1])
         print('end'.center(24, '*'))
-        choice = input('Input the No. of the item you want to purchase[q=quit]>>:').strip()
+        choice = input('Input the No. of the item you want to purchase[q=quit,i=info]>>:').strip()
         if choice == 'q' or choice == 'quit':
             print('You have already bought %s,balance is %s' %(shop_car,balance))
             flag = False
             break
+        if choice == 'i' or choice == 'info':
+            print('You have already bought %s,balance is %s' % (shop_car, balance))
+            continue
         if not choice.isdigit():
             print('Please enter the correct NO.')
             continue
@@ -69,6 +72,9 @@ while flag:
                 print('You have already bought %s,balance is %s' % (shop_car,balance))
                 flag = False
                 break
+            if choice == 'i' or choice == 'info':
+                print('You have already bought %s,balance is %s' % (shop_car,balance))
+                continue
             if not choice_num.isdigit():
                 print('please keyin number or out of rang')
                 continue
@@ -83,3 +89,8 @@ while flag:
             balance = balance - order
             shop_car.append(( msg_dic[choice][0].strip('\t'),choice_num))
             print('Purchase success! %s,Your balance is %d'%(shop_car,balance))
+            continue
+        else:
+            print('Your balance is not enough')
+            continue
+
