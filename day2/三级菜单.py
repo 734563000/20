@@ -49,12 +49,10 @@ menu = {
 }
 
 
-#标志位
-flag=True
 #存放浏览历史
 history=[]
 
-while flag:
+while True:
     #打印菜单
     print('star'.center(10,'*'))
     for i in menu:
@@ -65,7 +63,7 @@ while flag:
     #是否使用退出
     if choice == 'q' or choice == 'exit':
         print('exit !')
-        flag=False
+        break
     #用户是否选择返回
     if choice == 'b':
         #检查历史记录中还有没有数据

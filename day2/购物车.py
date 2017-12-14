@@ -85,6 +85,7 @@ while flag:
                 continue
             order = msg_dic[choice][1] * choice_num
             break
+        #判断余额是否足够
         if order < balance:
             balance = balance - order
             shop_car.append(( msg_dic[choice][0].strip('\t'),choice_num))
