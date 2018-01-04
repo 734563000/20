@@ -3,7 +3,7 @@
 # Author:Eio
 
 import json
-import os
+
 msg_dic=[
     ('apple\t',10),
     ('tesla\t',100000),
@@ -23,17 +23,21 @@ for i in range(len(msg_dic)):
 
 def login(username,password):
     global error_count
-    with open(account_file) as f:
+    with open(account_file,'r') as f:
         db = json.load(f)
     if username not in db:
         print('username error!')
         error_count+=1
         return None
-    if password == db[username]['password']:
-        print('Login successfully !')
-        return db[username]
-    else:
+    if password != db[username]['password']:
+        print('password error !')
         return None
+    if db[username]['status'] == '0':
+        return db[username]
+    if db[username]['status'] == '1':
+        print('your account is locked !')
+        return None
+
 
 def shoppingmall(acc_data):
     global shop_car
@@ -74,8 +78,6 @@ def shoppingmall(acc_data):
     Checkout(acc_data,choice,choice_num,order)
 
 
-
-
 def Checkout(acc_data,choice_item,choice_num,order):
     while True:
         menu = u'''
@@ -97,13 +99,11 @@ def Checkout(acc_data,choice_item,choice_num,order):
                 acc_data['salary'] = balance_new
                 db_write(acc_data['name'],acc_data)
                 print('Purchase success! %s,Your balance is %d' % (shop_car, balance_new))
-                return True
+                break
             else:
                 print('Your balance is not enough')
-                return False
+                break
         print("\033[31;1mOption does not exist!\033[0m")
-
-
 
 def db_read(username):
     with open(account_file) as f:
