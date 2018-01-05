@@ -17,27 +17,23 @@ account_file='db'
 user_info={}
 error_count=0
 max_error_count=2
+Charge=0.05
 list_num=[]
 for i in range(len(msg_dic)):
     list_num.append(i)
 
 def login(username,password):
     global error_count
-    with open(account_file,'r') as f:
+    with open(account_file) as f:
         db = json.load(f)
     if username not in db:
         print('username error!')
         error_count+=1
         return None
-    if password != db[username]['password']:
-        print('password error !')
-        return None
-    if db[username]['status'] == '0':
+    if password == db[username]['password']:
         return db[username]
-    if db[username]['status'] == '1':
-        print('your account is locked !')
+    else:
         return None
-
 
 def shoppingmall(acc_data):
     global shop_car
@@ -52,7 +48,6 @@ def shoppingmall(acc_data):
         choice = input('Input the No. of the item you want to purchase[q=quit,i=info]>>:').strip()
         if choice == 'q' or choice == 'quit':
             print('You have already bought %s,balance is %s' % (shop_car, balance))
-            flag = False
             return
         if choice == 'i' or choice == 'info':
             print('You have already bought %s,balance is %s' % (shop_car, balance))
@@ -64,7 +59,7 @@ def shoppingmall(acc_data):
         if choice not in list_num:
             print('Please enter the correct NO.')
             continue
-        choice_num = input('Input the quantity you want to buy [q=quit]>>:').strip()
+        choice_num = input('Input the quantity you want to buy >>:').strip()
         if not choice_num.isdigit():
             print('please keyin number or out of rang')
             continue
@@ -77,7 +72,6 @@ def shoppingmall(acc_data):
         break
     Checkout(acc_data,choice,choice_num,order)
 
-
 def Checkout(acc_data,choice_item,choice_num,order):
     while True:
         menu = u'''
@@ -88,7 +82,7 @@ def Checkout(acc_data,choice_item,choice_num,order):
         print(menu)
         choice = input('Please choose the way of payment:').strip()
         if choice == '1' or choice == 'Cash':
-            print("You don't have cash!")
+            print("I'm sorry. You don't accept cash for the time being")
             continue
         if choice == '2' or choice == 'Credit Card':
             balance = int(db_read(acc_data['name'])['salary'])
@@ -99,10 +93,10 @@ def Checkout(acc_data,choice_item,choice_num,order):
                 acc_data['salary'] = balance_new
                 db_write(acc_data['name'],acc_data)
                 print('Purchase success! %s,Your balance is %d' % (shop_car, balance_new))
-                break
+                return True
             else:
                 print('Your balance is not enough')
-                break
+                return False
         print("\033[31;1mOption does not exist!\033[0m")
 
 def db_read(username):
@@ -121,12 +115,14 @@ def db_write(name,acc_data):
 def main_menu(acc_data):
     menu = u'''
     --------- Menu ---------
-    \033[32;1m1.  购物商城
+    \033[32;1m1.  Shopping mall
     2.  ATM
+    3.  Log out
     \033[0m'''
     menu_dic = {
         '1': shoppingmall,
         '2': bank_menu,
+        '3': logout
     }
     exit_flag = False
     while not exit_flag:
@@ -139,12 +135,12 @@ def main_menu(acc_data):
         else:
             print("\033[31;1mOption does not exist!\033[0m")
 
-def bank_menu():
+def bank_menu(acc_data):
     menu = u'''
     --------- Bank ---------
     \033[32;1m1.  账户信息
-    2.  还款(功能已实现)
-    3.  取款(功能已实现)
+    2.  还款
+    3.  取款
     4.  转账
     5.  账单
     6.  退出
@@ -162,11 +158,105 @@ def bank_menu():
         print(menu)
         user_option = input(">>:").strip()
         if user_option in menu_dic:
-            print('accdata',acc_data)
+            # print('accdata',acc_data)
             #acc_data['is_authenticated'] = False
             menu_dic[user_option](acc_data)
         else:
             print("\033[31;1mOption does not exist!\033[0m")
+
+def account_info(acc_data):
+    # print(acc_data)
+    print('name:\t%s\ncash:\t%s\nCredit line:\t%s\nSurplus amount:\t%s'%(acc_data['name'],\
+                                    acc_data['cash'], \
+                                    acc_data['Creditline'], \
+                                    acc_data['salary']))
+
+def repay(acc_data):
+    cash = int(db_read(acc_data['name'])['cash'])
+    salary = int(db_read(acc_data['name'])['salary'])
+    while True:
+        money = input('Please enter the amount of payment you want to pay:').strip()
+        if not money.isdigit():
+            print('please keyin number')
+            continue
+        break
+    money = int(money)
+    if cash >= money:
+        cash_new = cash - money
+        salary_new = salary + money
+        acc_data['cash'] = cash_new
+        acc_data['salary'] = salary_new
+        db_write(acc_data['name'], acc_data)
+        print('Repayment success ! ')
+    else:
+        print('Money not enough')
+
+def withdraw(acc_data):
+    cash = int(db_read(acc_data['name'])['cash'])
+    salary = int(db_read(acc_data['name'])['salary'])
+    while True:
+        money = input('Please enter the amount you want to cash in:').strip()
+        if not money.isdigit():
+            print('please keyin number')
+            continue
+        break
+    money = int(money)
+    if salary >= money:
+        sc= money * Charge
+        cash_new = cash + money - sc
+        salary_new = salary - money
+        acc_data['cash'] = cash_new
+        acc_data['salary'] = salary_new
+        db_write(acc_data['name'], acc_data)
+        print('Successful withdrawal ! Your service charge is %s' %sc)
+    else:
+        print('Money not enough')
+
+def transfer(acc_data):
+    print("I'm sorry. It's not finished yet.")
+
+def pay_check(acc_data):
+    print("I'm sorry. It's not finished yet.")
+
+def logout(acc_data):
+    print('bye bye ! %s' % (acc_data['name']))
+    exit()
+
+def manager_menu(acc_data):
+    menu = u'''
+    --------- Menu ---------
+    \033[32;1m1.  Add an account
+    2.  Change User quota
+    3.  Lock account
+    4.  Main menu
+    5.  Log out
+    \033[0m'''
+    menu_dic = {
+        '1': addacc,
+        '2': changequota,
+        '3': lockacc,
+        '4': main_menu,
+        '5': logout
+    }
+    exit_flag = False
+    while not exit_flag:
+        print(menu)
+        user_option = input(">>:").strip()
+        if user_option in menu_dic:
+            # print('accdata:',acc_data)
+            #acc_data['is_authenticated'] = False
+            menu_dic[user_option](acc_data)
+        else:
+            print("\033[31;1mOption does not exist!\033[0m")
+
+def addacc():
+    pass
+
+def changequota():
+    pass
+
+def lockacc():
+    pass
 
 def main():
     while True:
@@ -178,9 +268,15 @@ def main():
         res = login(username,password)
         if res != None:
             break
-    main_menu(res)
-
-
+    if res['status'] == "0":
+        print('Login successfully !')
+        main_menu(res)
+    if res['status'] == "1":
+        print('Your account has been locked !')
+        exit()
+    if res['status'] == "3":
+        print('Welcome administrator !')
+        manager_menu(res)
 
 if __name__ == '__main__':
     main()

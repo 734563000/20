@@ -1,1 +1,1 @@
-{"egon": {"name": "egon", "password": "123", "salary": 14970, "status": "0"}}
+{"egon": {"name": "egon", "password": "123", "Creditline": 15000, "salary": 13990, "cash": 950.0, "status": "0"}, "yy": {"name": "yy", "password": "123", "Creditline": 15000, "salary": 14480, "cash": 450, "status": "1"}, "admin": {"name": "admin", "password": "123", "Creditline": 15000, "salary": 14480, "cash": 450, "status": "3"}}
