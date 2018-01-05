@@ -11,7 +11,7 @@ msg_dic=[
     ('lenovo\t',30000),
     ('chicken',100),
 ]
-
+creditline=15000
 shop_car=[]
 account_file='db'
 user_info={}
@@ -37,7 +37,7 @@ def login(username,password):
 
 def shoppingmall(acc_data):
     global shop_car
-    balance = db_read(acc_data['name'])['salary']
+    balance = db_read(acc_data['name'])['Creditline'] - db_read(acc_data['name'])['consumption']
     print(balance)
     while True:
         print('menu star'.center(24, '*'))
@@ -85,12 +85,12 @@ def Checkout(acc_data,choice_item,choice_num,order):
             print("I'm sorry. You don't accept cash for the time being")
             continue
         if choice == '2' or choice == 'Credit Card':
-            balance = int(db_read(acc_data['name'])['salary'])
-            print(order,balance)
+            balance = int(acc_data['Creditline'] - acc_data['consumption'])
+            # print(order,balance)
             if order < balance:
-                balance_new = balance - order
+                balance_new = acc_data['Creditline'] - (acc_data['consumption'] + order)
                 shop_car.append((msg_dic[choice_item][0].strip('\t'), choice_num))
-                acc_data['salary'] = balance_new
+                acc_data['consumption'] = acc_data['consumption'] + order
                 db_write(acc_data['name'],acc_data)
                 print('Purchase success! %s,Your balance is %d' % (shop_car, balance_new))
                 return True
@@ -138,12 +138,12 @@ def main_menu(acc_data):
 def bank_menu(acc_data):
     menu = u'''
     --------- Bank ---------
-    \033[32;1m1.  账户信息
-    2.  还款
-    3.  取款
-    4.  转账
-    5.  账单
-    6.  退出
+    \033[32;1m 1. Account information
+     2. Repay
+     3. Withdrawals
+     4. Transfer
+     5. Billing
+     6. Exit
     \033[0m'''
     menu_dic = {
         '1': account_info,
@@ -166,14 +166,15 @@ def bank_menu(acc_data):
 
 def account_info(acc_data):
     # print(acc_data)
-    print('name:\t%s\ncash:\t%s\nCredit line:\t%s\nSurplus amount:\t%s'%(acc_data['name'],\
+
+    print('name:\t%s\ncash:\t%s\nCredit line:\t%s\nCredits:\t%s'%(acc_data['name'],\
                                     acc_data['cash'], \
-                                    acc_data['Creditline'], \
-                                    acc_data['salary']))
+                                    acc_data['Creditline'],
+                                    acc_data['Creditline'] - acc_data['consumption']))
 
 def repay(acc_data):
     cash = int(db_read(acc_data['name'])['cash'])
-    salary = int(db_read(acc_data['name'])['salary'])
+    salary = int(db_read(acc_data['name'])['consumption'])
     while True:
         money = input('Please enter the amount of payment you want to pay:').strip()
         if not money.isdigit():
@@ -183,19 +184,19 @@ def repay(acc_data):
     money = int(money)
     if cash >= money:
         cash_new = cash - money
-        salary_new = salary + money
+        salary_new = salary - money
         acc_data['cash'] = cash_new
-        acc_data['salary'] = salary_new
+        acc_data['consumption'] = salary_new
         db_write(acc_data['name'], acc_data)
         print('Repayment success ! ')
     else:
-        print('Money not enough')
+        print('Cash not enough !')
 
 def withdraw(acc_data):
     cash = int(db_read(acc_data['name'])['cash'])
-    salary = int(db_read(acc_data['name'])['salary'])
+    salary = int(db_read(acc_data['name'])['consumption'])
     while True:
-        money = input('Please enter the amount you want to cash in:').strip()
+        money = input('Please enter the amount you want to withdraw cash:').strip()
         if not money.isdigit():
             print('please keyin number')
             continue
@@ -204,9 +205,9 @@ def withdraw(acc_data):
     if salary >= money:
         sc= money * Charge
         cash_new = cash + money - sc
-        salary_new = salary - money
+        salary_new = salary + money
         acc_data['cash'] = cash_new
-        acc_data['salary'] = salary_new
+        acc_data['consumption'] = salary_new
         db_write(acc_data['name'], acc_data)
         print('Successful withdrawal ! Your service charge is %s' %sc)
     else:
@@ -249,14 +250,61 @@ def manager_menu(acc_data):
         else:
             print("\033[31;1mOption does not exist!\033[0m")
 
-def addacc():
-    pass
+def addacc(acc_data):
+    name = input('Please enter your registration name:').strip()
+    passwd = input('Please enter your registration name:').strip()
+    with open(account_file) as f:
+        data = json.load(f)
+    data[name]={'name': name, 'password': passwd, 'Creditline': creditline, 'consumption': 0, 'cash': 0, 'status': "0"}
+    with open(account_file, 'w') as f:
+        json.dump(data,f)
+    print('registration success !')
 
-def changequota():
-    pass
+def changequota(acc_data):
+    while True:
+        cname = input('Please enter the user name you want to change:')
+        with open(account_file) as f:
+            acc_data = json.load(f)
+        if cname not in acc_data:
+            print('username error !')
+            continue
+        break
+    while True:
+        quota_new = input('Please enter the credit you want to adjust:').strip()
+        if not quota_new.isdigit():
+            print('please keyin number')
+            continue
+        break
+    acc_data = db_read(cname)
+    acc_data['Creditline'] = quota_new
+    db_write(acc_data['name'], acc_data)
+    print('Change successfully ! please login again')
+    exit()
 
-def lockacc():
-    pass
+def lockacc(acc_data):
+    while True:
+        cname = input('Please enter the user name you want to change:')
+        with open(account_file) as f:
+            acc_data = json.load(f)
+        if cname not in acc_data:
+            print('username error !')
+            continue
+        break
+    while True:
+        status_new = input('Please enter the state you want to change(0:normal 1:locked):').strip()
+        if not status_new.isdigit():
+            print('please keyin number')
+            continue
+        # status_new = int(status_new)
+        if status_new not in ('1','0') :
+            print('out of rangs !')
+            continue
+        break
+    acc_data = db_read(cname)
+    acc_data['status'] = status_new
+    db_write(acc_data['name'], acc_data)
+    print('Change successfully ! please login again')
+    exit()
 
 def main():
     while True:
