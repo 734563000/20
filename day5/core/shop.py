@@ -10,7 +10,6 @@ shop_car=[]
 def shoppingmall(acc_data):
     global shop_car
     balance = db.db_read(acc_data['name'])['Creditline'] - db.db_read(acc_data['name'])['consumption']
-    print(balance)
     while True:
         print('menu star'.center(24, '*'))
         print('No.', 'Name  ', '\t\t', 'Price')
@@ -64,7 +63,8 @@ def Checkout(acc_data,choice_item,choice_num,order):
                 shop_car.append((settings.msg_dic[choice_item][0].strip('\t'), choice_num))
                 acc_data['consumption'] = acc_data['consumption'] + order
                 db.db_write(acc_data['name'],acc_data)
-                print('Purchase success! %s,Your balance is %d' % (shop_car, balance_new))
+                settings.lg.info('Purchase success! %s,Your balance is %d' % (shop_car, balance_new))
+                settings.jy.info('%s 消费了 %s , 余额为:%s'% (acc_data['name'] , order , balance_new))
                 return True
             else:
                 print('Your balance is not enough')

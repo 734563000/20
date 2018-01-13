@@ -8,28 +8,29 @@ import json
 
 current_status={'user':None,'login_status':None}
 
-
+#登录装饰器
 def auth(func):
     def inner(*args,**kwargs):
         if settings.acc_data:
             res = func(*args, **kwargs)
             return  res
-        while True:
-            if settings.error_count > settings.max_error_count:
-                print('Excessive number of errors ! exit ')
-                exit()
-            username = input('username:').strip()
-            password = input('password:').strip()
-            with open(settings.account_file) as f:
-                db = json.load(f)
-            if username not in db:
-                print('username error!')
-                settings.error_count += 1
-                continue
-            if password == db[username]['password']:
-                settings.acc_data = db[username]
-                res = func(*args, **kwargs)
-                return res
-            else:
-                continue
+        else:
+            while True:
+                if settings.error_count > settings.max_error_count:
+                    print('Excessive number of errors ! exit ')
+                    exit()
+                username = input('username:').strip()
+                password = input('password:').strip()
+                with open(settings.account_file) as f:
+                    db = json.load(f)
+                if username not in db:
+                    print('username error!')
+                    settings.error_count += 1
+                    continue
+                if password == db[username]['password']:
+                    settings.acc_data = db[username]
+                    res = func(*args, **kwargs)
+                    return res
+                else:
+                    continue
     return inner

@@ -4,6 +4,7 @@
 
 from conf import settings
 from lib import db
+import json
 
 def bank_menu(acc_data):
     menu = u'''
@@ -59,13 +60,15 @@ def repay(acc_data):
         acc_data['cash'] = cash_new
         acc_data['consumption'] = salary_new
         db.db_write(acc_data['name'], acc_data)
-        print('Repayment success ! ')
+        settings.lg.info('%s Repayment success ! ' %acc_data['name'])
+        settings.jy.info('ATM: %s 还款了 %s' %(acc_data['name'],money))
     else:
         print('Cash not enough !')
 
 def withdraw(acc_data):
     cash = int(db.db_read(acc_data['name'])['cash'])
     salary = int(db.db_read(acc_data['name'])['consumption'])
+    balance = int(db.db_read(acc_data['name'])['Creditline']) - salary
     while True:
         money = input('Please enter the amount you want to withdraw cash:').strip()
         if not money.isdigit():
@@ -73,22 +76,51 @@ def withdraw(acc_data):
             continue
         break
     money = int(money)
-    if salary >= money:
+    if balance >= money:
         sc= money * settings.Charge
         cash_new = cash + money - sc
         salary_new = salary + money
         acc_data['cash'] = cash_new
         acc_data['consumption'] = salary_new
         db.db_write(acc_data['name'], acc_data)
-        print('Successful withdrawal ! Your service charge is %s' %sc)
+        settings.lg.info('Successful withdrawal ! Your service charge is %s' %sc)
+        settings.jy.info('ATM: %s 取现了 %s' % (acc_data['name'], money))
     else:
         print('Money not enough')
 
 def transfer(acc_data):
-    print("I'm sorry. It's not finished yet.")
+    while True:
+        cname = input('Please enter the user name you want to transfer:')
+        with open(settings.account_file) as f:
+            acc_data_all = json.load(f)
+        if cname not in acc_data_all:
+            print('username error !')
+            continue
+        break
+    while True:
+        transfer_money = input('Please enter the transfer you want to:').strip()
+        if not transfer_money.isdigit():
+            print('please keyin number')
+            continue
+        break
+    transfer_money = int(transfer_money)
+    with open(settings.account_file) as f:
+        acc_data_all = json.load(f)
+    acc_data_all[acc_data['name']]['cash'] = acc_data_all[acc_data['name']]['cash'] - transfer_money
+    acc_data_all[cname]['cash'] = acc_data_all[cname]['cash'] + transfer_money
+    with open(settings.account_file, 'w') as f:
+        json.dump(acc_data_all, f)
+    settings.lg.info('Successful transfer !%s 转给了 %s 一共%s元 ' %(acc_data['name'],cname, transfer_money))
+    settings.jy.info('ATM: %s 转出了 %s' % (acc_data['name'], transfer_money))
+    settings.jy.info('ATM: %s 转入了 %s' % (cname, transfer_money))
+
 
 def pay_check(acc_data):
-    print("I'm sorry. It's not finished yet.")
+    with open(settings.JYLOG_PATH, 'r',encoding='utf-8') as f:
+        pc = f.readlines()
+        for i in pc:
+            if acc_data['name'] in i:
+                print(i)
 
 def logout(acc_data):
     print('bye bye ! %s' % (acc_data['name']))
