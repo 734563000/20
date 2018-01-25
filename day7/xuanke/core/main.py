@@ -11,18 +11,22 @@ import os
 class Funtion:
     def datasave(self,objname):
         pickle.dump(self,open(os.path.join(settings.db_dir,objname),'wb'))
-    def dataload(self,objname):
+
+    @staticmethod
+    def dataload():
         ret=[]
         for i in settings.db_dir:
-            obj=pickle.load(open(os.path.join(settings.db_dir,objname),'rb'))
+            obj=pickle.load(open(os.path.join(settings.db_dir,i),'rb'))
             ret.append(obj)
         return ret
 
 class School:
     def __init__(self,name,addr,course):
         self.name=name
-        self.addr=addr
-        self.course=course
+
+    def __str__(self):
+        return self.name
+
     def create_cls(self):
         """创建班级, 关联课程讲师"""
         pass
