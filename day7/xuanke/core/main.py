@@ -71,7 +71,7 @@ class Classes(BaseModel):
         self.school_nid=school_nid
         self.course_to_teacher_list=course_to_teacher_list
 
-class Sudents(BaseModel):
+class Students(BaseModel):
     db_path=settings.STUDENT_DB_DIR
     def __init__(self,name,age,qq,classes_nid):
         self.nid = id.StudentNid(self.db_path)
@@ -89,6 +89,24 @@ class Teacher(BaseModel):
         self.level = level
         self.__account=0
         self.create_time=time.strftime('%Y-%m-%d %X')
+
+    @staticmethod
+    def login():#登录功能
+        try:
+            name=input('user: ').strip()
+            for obj in Teacher.get_all_obj_list():
+                if obj.name == name:
+                    status = True
+                    error=''
+                    data='登录成功'
+                    break
+            else:
+                raise Exception('用户名错误')
+        except Exception as e:
+            status=False
+            error=str(e)
+            data=''
+        return {'status':status,'error':error,'data':data}
 
 class Admin(BaseModel):
     db_path = settings.ADMIN_DB_DIR

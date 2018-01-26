@@ -1,6 +1,6 @@
 #_*_coding:utf-8_*_
 __author__ = 'Linhaifeng'
-from core.main import Sudents
+from core.main import Students
 
 class register:
     """

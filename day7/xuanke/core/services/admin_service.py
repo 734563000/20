@@ -4,6 +4,8 @@ from core.main import Admin
 from core.main import School
 from core.main import Teacher
 from core.main import Course
+from core.main import Students
+
 def create_school():
     try:
         name=input('请输入学校名字: ').strip()
@@ -96,10 +98,29 @@ def show_classes():
     pass
 
 def create_student():
-    pass
+    try:
+        name=input('请输入学生姓名: ').strip()
+        age=input('请输入学生年龄: ').strip()
+        qq = input('请输入学生qq: ').strip()
+        classes_nid = input('请输入学生课程: ').strip()
+        students_name_list=[obj.name for obj in Students.get_all_obj_list()]
+        if name in students_name_list:
+            raise Exception('\033[43;1m老师[%s] 已经存在,不可重复创建\033[0m' %(name))
+        obj=Students(name,age,qq,classes_nid)
+        obj.save()
+        status=True
+        error=''
+        data='\033[33;1m学生[%s] 年龄[%s] QQ[%s] 班级[%s]创建成功\033[0m' %(obj.name,obj.age,obj.qq,obj.classes_nid)
+    except Exception as e:
+        status=False
+        error=str(e)
+        data=''
+    return {'status':status,'error':error,'data':data}
 
 def show_student():
-    pass
+    for obj in Students.get_all_obj_list():
+        print('\033[33;1m学生[%s] 年龄[%s] QQ[%s] 班级[%s]创建成功\033[0m'\
+              %(obj.name,obj.age,obj.qq,obj.classes_nid))
 
 
 
