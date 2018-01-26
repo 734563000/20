@@ -27,6 +27,6 @@ if __name__ == '__main__':
     }
     while True:
         print(msg)
-        choice=input('输入角色: ').strip()
+        choice=input('select role: ').strip()
         if choice not in role_main:continue
         role_main[choice]()

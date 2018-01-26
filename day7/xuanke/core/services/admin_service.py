@@ -5,6 +5,11 @@ from core.main import School
 from core.main import Teacher
 from core.main import Course
 from core.main import Students
+from core.main import Classes
+from core.main import Coure2teacher
+
+from conf import settings
+import pickle,os
 
 def create_school():
     try:
@@ -24,7 +29,6 @@ def create_school():
         data=''
     return {'status':status,'error':error,'data':data}
 
-
 def show_school():
     for obj in School.get_all_obj_list():
         print('\033[45;1m学校[%s] 地址[%s] 创建日期[%s]\033[0m'.center(60,'-') \
@@ -32,12 +36,18 @@ def show_school():
 
 def create_teacher():
     try:
+        print('新入职教师'.center(60,'='))
+        school_list=School.get_all_obj_list()
+        for k,obj in enumerate(school_list):
+            print(k,obj,obj.addr)
+        sid=int(input('请选择学校: '))
+        school_obj=school_list[sid]
         name=input('请输入老师姓名: ').strip()
         level=input('请输入老师级别: ').strip()
         teacher_name_list=[obj.name for obj in Teacher.get_all_obj_list()]
         if name in teacher_name_list:
             raise Exception('\033[43;1m老师[%s] 已经存在,不可重复创建\033[0m' %(name))
-        obj=Teacher(name,level)
+        obj=Teacher(name,level,school_obj.nid)
         obj.save()
         status=True
         error=''
@@ -48,12 +58,10 @@ def create_teacher():
         data=''
     return {'status':status,'error':error,'data':data}
 
-
 def show_teacher():
     for obj in Teacher.get_all_obj_list():
         print('\033[33;1m老师[%s] 级别[%s] 创建时间[%s]\033[0m'.center(60,'-') \
               %(obj.name,obj.level,obj.create_time))
-
 
 def create_course():
     try:
@@ -71,6 +79,7 @@ def create_course():
         course_name_list=[(obj.name,obj.school_nid.uuid) for obj in Course.get_all_obj_list()]
         if (name,school_obj.nid.uuid) in course_name_list:
             raise Exception('\033[43;1m课程[%s] 已经存在,不可重复创建\033[0m' %(name))
+        print(name,price,period,school_obj.nid)
         obj=Course(name,price,period,school_obj.nid)
         obj.save()
         status=True
@@ -89,10 +98,53 @@ def show_course():
                 obj.name,obj.price,obj.period))
 
 def create_course_to_teacher():
-    pass
+    try:
+        print('创建课程与教师的关系'.center(60,'='))
+        school_list=School.get_all_obj_list()
+        for k,obj in enumerate(school_list):
+            print(k,obj,obj.addr)
+        sid=int(input('请选择学校: '))
+        school_obj=school_list[sid]
+
+        teacher_list=Teacher.get_all_obj_list()
+        for k,obj in enumerate(teacher_list):
+            print(k,obj.name)
+        sid=int(input('请选择教师: '))
+        teacher_obj=teacher_list[sid]
+
+        obj=Coure2teacher(school_obj.nid,teacher_obj.nid)
+        obj.save()
+        status=True
+        error=''
+        data='关系创建成功'
+    except Exception as e:
+        status=False
+        error=str(e)
+        data=''
+    return {'status':status,'error':error,'data':data}
 
 def create_classes():
-    pass
+    try:
+        print('创建班级'.center(60,'='))
+        school_list=School.get_all_obj_list()
+        for k,obj in enumerate(school_list):
+            print(k,obj,obj.addr)
+        sid=int(input('请选择创建班级的学校: '))
+        school_obj=school_list[sid]
+
+        name=input('请输入班级名: ').strip()
+        tuition=input('请输tuition: ').strip()
+
+        obj=Classes(name,tuition,school_obj.nid,course_to_teacher_list)
+        obj.save()
+        status=True
+        error=''
+        data='\033[33;1m班级名[%s] 创建成功\033[0m' %(obj.name)
+    except Exception as e:
+        status=False
+        error=str(e)
+        data=''
+    return {'status':status,'error':error,'data':data}
 
 def show_classes():
     pass
@@ -102,11 +154,16 @@ def create_student():
         name=input('请输入学生姓名: ').strip()
         age=input('请输入学生年龄: ').strip()
         qq = input('请输入学生qq: ').strip()
-        classes_nid = input('请输入学生课程: ').strip()
+
+        course_list = Course.get_all_obj_list()
+        for k, obj in enumerate(course_list):
+            print(k, obj.name, obj.price)
+        sid = int(input('请选择课程: '))
+        course_obj = course_list[sid]
         students_name_list=[obj.name for obj in Students.get_all_obj_list()]
         if name in students_name_list:
-            raise Exception('\033[43;1m老师[%s] 已经存在,不可重复创建\033[0m' %(name))
-        obj=Students(name,age,qq,classes_nid)
+            raise Exception('\033[43;1m学生[%s] 已经存在,不可重复创建\033[0m' %(name))
+        obj=Students(name,age,qq,course_obj.nid)
         obj.save()
         status=True
         error=''

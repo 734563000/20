@@ -16,4 +16,10 @@ def main():
     pass
 
 def login():
-    pass
+    ret=Students.login()
+    if ret:
+            if ret['status']:
+                print(ret['data'].center(60,'-'))
+                main()
+            else:
+                print(ret['error'].center(60,'-'))

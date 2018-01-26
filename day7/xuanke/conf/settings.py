@@ -5,7 +5,7 @@ import os
 import logging
 
 BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-db_dir=os.path.join(BASE_DIR,'db','db')
+db_dir=os.path.join(BASE_DIR,'db')
 ADMIN_DB_DIR=os.path.join(BASE_DIR,'db','admin')
 SCHOOL_DB_DIR=os.path.join(BASE_DIR,'db','school')
 TEACHER_DB_DIR=os.path.join(BASE_DIR,'db','teacher')

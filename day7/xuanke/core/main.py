@@ -2,11 +2,10 @@
 # -*- coding:utf-8-*-
 # Author:Eio
 
-import pickle,time
+import pickle,time,os
 from conf import settings
 from core import id
 
-import os
 
 
 
@@ -27,11 +26,11 @@ class BaseModel:
 
 class School(BaseModel):
     db_path = settings.SCHOOL_DB_DIR
-    def __init__(self,name,addr,course):
-        self.nid = id.SchoolNid(self.db_path)
-        self.name = name
-        self.addr = addr
-        self.id = func.creat_uuid()
+    def __init__(self,name,addr):
+        self.nid=id.SchoolNid(self.db_path)
+        self.name=name
+        self.addr=addr
+        self.create_time=time.strftime('%Y-%m-%d %X')
 
     def __str__(self):
         return self.name
@@ -42,12 +41,12 @@ class School(BaseModel):
 
 class Course(BaseModel):
     db_path = settings.COURSE_DB_DIR
-    def __init__(self,name,price,cycle,school_nid):
+    def __init__(self, name, price, period, school_nid):
         self.nid = id.CourseNid(self.db_path)
-        self.name = name  # 课程名
-        self.price = price  # 价格
-        self.cycle = cycle  # 周期
-        self.school_nid = school_nid
+        self.name = name   #课程名
+        self.price = price  #价格
+        self.period = period#周期
+        self.school_nid = school_nid #学校信息
 
 class Coure2teacher(BaseModel):
     db_path = settings.COURSE_TO_TEACHER_DB_DIR
@@ -65,7 +64,7 @@ class Coure2teacher(BaseModel):
 class Classes(BaseModel):
     db_path=settings.CLASSES_DB_DIR
     def __init__(self,name,tuition,school_nid,course_to_teacher_list):
-        self.nid=identifier.ClassesNid(self.db_path)
+        self.nid=id.ClassesNid(self.db_path)
         self.name=name
         self.tuition=tuition
         self.school_nid=school_nid
@@ -81,13 +80,31 @@ class Students(BaseModel):
         self.classes_nid = classes_nid
         self.score=Score(self.nid)
 
+    @staticmethod
+    def login():#登录功能
+        try:
+            name=input('user: ').strip()
+            for obj in Students.get_all_obj_list():
+                if obj.name == name:
+                    status = True
+                    error=''
+                    data='登录成功'
+                    break
+            else:
+                raise Exception('学生用户名不存在!')
+        except Exception as e:
+            status=False
+            error=str(e)
+            data=''
+        return {'status':status,'error':error,'data':data}
+
 class Teacher(BaseModel):
     db_path=settings.TEACHER_DB_DIR
-    def __init__(self,name,level):
+    def __init__(self,name,level,schoolnid):
         self.nid = id.TeacherNid(self.db_path)
         self.name = name
         self.level = level
-        self.__account=0
+        self.schoolnid = schoolnid
         self.create_time=time.strftime('%Y-%m-%d %X')
 
     @staticmethod
@@ -101,7 +118,7 @@ class Teacher(BaseModel):
                     data='登录成功'
                     break
             else:
-                raise Exception('用户名错误')
+                raise Exception('教师用户名错误')
         except Exception as e:
             status=False
             error=str(e)
