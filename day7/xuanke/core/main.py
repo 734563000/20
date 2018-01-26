@@ -2,27 +2,36 @@
 # -*- coding:utf-8-*-
 # Author:Eio
 
-import pickle
+import pickle,time
 from conf import settings
+from core import id
+
 import os
 
 
 
-class Funtion:
-    def datasave(self,objname):
-        pickle.dump(self,open(os.path.join(settings.db_dir,objname),'wb'))
+class BaseModel:
+    def save(self):
+        # 获取目录路径,类名为目录.uuid为文件名
+        file_path=os.path.join(self.db_path,str(self.nid))
+        # 存放数据
+        pickle.dump(self,open(file_path,'wb'))
 
-    @staticmethod
-    def dataload():
+    @classmethod
+    def get_all_obj_list(cls):
         ret=[]
-        for i in settings.db_dir:
-            obj=pickle.load(open(os.path.join(settings.db_dir,i),'rb'))
-            ret.append(obj)
+        for filename in os.listdir(cls.db_path):
+            file_path = os.path.join(cls.db_path,filename)
+            ret.append(pickle.load(open(file_path,'rb')))
         return ret
 
-class School:
+class School(BaseModel):
+    db_path = settings.SCHOOL_DB_DIR
     def __init__(self,name,addr,course):
-        self.name=name
+        self.nid = id.SchoolNid(self.db_path)
+        self.name = name
+        self.addr = addr
+        self.id = func.creat_uuid()
 
     def __str__(self):
         return self.name
@@ -31,53 +40,89 @@ class School:
         """创建班级, 关联课程讲师"""
         pass
 
-class People:
-    def __init__(self,name,sex,age):
-        self.name=name
-        self.sex=sex
-        self.age=age
-
-class Sudents(People):
-    def __init__(self,name,sex,age):
-        super().__init__(name,sex,age)
-
-
-    def register(self):
-        """注册"""
-        pass
-
-    def pay_money(self):
-        """交学费"""
-        pass
-
-    def select_class(self):
-        """选择班级"""
-        pass
-
-class Course:
-    def __init__(self,name,cycle,price):
+class Course(BaseModel):
+    db_path = settings.COURSE_DB_DIR
+    def __init__(self,name,price,cycle,school_nid):
+        self.nid = id.CourseNid(self.db_path)
         self.name = name  # 课程名
-        self.cycle=cycle  # 周期
-        self.price=price  # 价格
+        self.price = price  # 价格
+        self.cycle = cycle  # 周期
+        self.school_nid = school_nid
 
-class Teacher(People):
-    def __init__(self,name,sex,age,courses,addr):
-        super().__init__(name,sex,age)
-        self.courses=courses
-        self.addr=addr
+class Coure2teacher(BaseModel):
+    db_path = settings.COURSE_TO_TEACHER_DB_DIR
+    def __init__(self,course_nid,school_nid):
+        self.nid=id.Course2TeacherNid(self.db_path)
+        self.course_nid=course_nid
+        self.school_nid=school_nid
 
-    def manage_class(self):
-        """管理班级"""
-        pass
+    def get_course_to_teacher_list(self):
+        ret=self.get_all_obj_list()
+        if ret:
+            return [ret.course_nid.get_obj_by_uuid(),ret.classes_nid.get_obj_by_uuid()]
+        return [None,None]
 
-    def select_class(self, cls):
-        """选择班级"""
-        pass
+class Classes(BaseModel):
+    db_path=settings.CLASSES_DB_DIR
+    def __init__(self,name,tuition,school_nid,course_to_teacher_list):
+        self.nid=identifier.ClassesNid(self.db_path)
+        self.name=name
+        self.tuition=tuition
+        self.school_nid=school_nid
+        self.course_to_teacher_list=course_to_teacher_list
 
-    def view_students(self, cls):
-        """查看班级学员列表"""
-        pass
+class Sudents(BaseModel):
+    db_path=settings.STUDENT_DB_DIR
+    def __init__(self,name,age,qq,classes_nid):
+        self.nid = id.StudentNid(self.db_path)
+        self.name = name
+        self.age = age
+        self.qq = qq
+        self.classes_nid = classes_nid
+        self.score=Score(self.nid)
 
-    def change_fraction(self, name, fraction):
-        """修改学员成绩"""
-        pass
+class Teacher(BaseModel):
+    db_path=settings.TEACHER_DB_DIR
+    def __init__(self,name,level):
+        self.nid = id.TeacherNid(self.db_path)
+        self.name = name
+        self.level = level
+        self.__account=0
+        self.create_time=time.strftime('%Y-%m-%d %X')
+
+class Admin(BaseModel):
+    db_path = settings.ADMIN_DB_DIR
+    def __init__(self,username,passwd):
+        self.nid=id.AdminNid(self.db_path)
+        self.username = username
+        self.passwd = passwd
+
+    @staticmethod
+    def login():#登录功能
+        try:
+            name=input('user: ').strip()
+            pas=input('passwd: ').strip()
+            for obj in Admin.get_all_obj_list():
+                if obj.username == name and obj.passwd == pas:
+                    status = True
+                    error=''
+                    data='登录成功'
+                    break
+            else:
+                raise Exception('用户名或密码错误')
+        except Exception as e:
+            status=False
+            error=str(e)
+            data=''
+        return {'status':status,'error':error,'data':data}
+
+class Score:
+    def __init__(self,nid):
+        self.nid=nid
+        self.score_dict={}
+
+    def set(self,course_to_teacher_nid,number):
+        self.score_dict[course_to_teacher_nid]=number
+
+    def get(self,course_to_teacher_nid):
+        return self.score_dict.get(course_to_teacher_nid)
