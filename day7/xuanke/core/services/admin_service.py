@@ -1,5 +1,7 @@
 #_*_coding:utf-8_*_
-__author__ = 'Linhaifeng'
+# -*- coding:utf-8-*-
+# Author:Eio
+
 from core.main import Admin
 from core.main import School
 from core.main import Teacher
@@ -7,9 +9,6 @@ from core.main import Course
 from core.main import Students
 from core.main import Classes
 from core.main import Coure2teacher
-
-from conf import settings
-import pickle,os
 
 def create_school():
     try:
@@ -51,7 +50,8 @@ def create_teacher():
         obj.save()
         status=True
         error=''
-        data='\033[33;1m老师[%s] 级别[%s] 时间[%s]创建成功\033[0m' %(obj.name,obj.level,obj.create_time)
+        data='\033[33;1m老师[%s] 级别[%s] 学校[%s] 地点[%s] 时间[%s]创建成功\033[0m' \
+             %(obj.name,obj.level,school_obj.name,school_obj.addr,obj.create_time)
     except Exception as e:
         status=False
         error=str(e)
@@ -100,11 +100,11 @@ def show_course():
 def create_course_to_teacher():
     try:
         print('创建课程与教师的关系'.center(60,'='))
-        school_list=School.get_all_obj_list()
-        for k,obj in enumerate(school_list):
+        Course_list=Course.get_all_obj_list()
+        for k,obj in enumerate(Course_list):
             print(k,obj,obj.addr)
-        sid=int(input('请选择学校: '))
-        school_obj=school_list[sid]
+        sid=int(input('请选择课程: '))
+        school_obj=Course_list[sid]
 
         teacher_list=Teacher.get_all_obj_list()
         for k,obj in enumerate(teacher_list):
