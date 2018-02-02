@@ -3,12 +3,16 @@
 # Author:Eio
 
 import os,sys
+from core import main
+from conf import settings
+
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
-from core import main
-
 
 if __name__ == '__main__':
-    server=main.FtpServer('127.0.0.1',8081)
-    main.serve_forever()
+    server=main.FtpServer(settings.HOST,settings.PORT)
+    server.login()
+    # server.serve_forever()
