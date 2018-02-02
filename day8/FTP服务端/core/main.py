@@ -20,10 +20,6 @@ class FtpServer:
         self.server.listen(5)
 
     def serve_forever(self):
-        # print('server starting...')
-        # while True:
-        #     self.conn,self.client_addr=self.server.accept()
-        #     print(self.client_addr)
         while True:
             try:
                 print('in serve_forever')
@@ -42,9 +38,13 @@ class FtpServer:
 
     def get(self,params): #params=['get','a.txt']
         print('in get')
+        if len(params) < 3:
+            headers_bytes = {}
+            self.conn.send(struct.pack('i', len(headers_bytes)))
+            return
         username=params[2]
         filename=params[1] #filename='a.txt'
-        filepath=os.path.join(settings.SHARE_DIR,username,filename) #
+        filepath = os.path.join(settings.SHARE_DIR, username, filename)
         if os.path.exists(filepath):
             #1、制作报头
             headers = {
@@ -58,16 +58,19 @@ class FtpServer:
 
             #2、先发报头的长度
             self.conn.send(struct.pack('i',len(headers_bytes)))
-            print('发送报文长度')
+            # print('发送报文长度')
             #3、发送报头
             self.conn.send(headers_bytes)
-            print('发送报头')
+            # print('发送报头')
 
             #4、发送真实的数据
-            print('发送数据')
+            # print('发送数据')
             with open(filepath,'rb') as f:
                 for line in f:
                     self.conn.send(line)
+        # else:
+        #     headers_bytes = {}
+        #     self.conn.send(struct.pack('i', len(headers_bytes)))
 
     def put(self,params):
         filename=params[1] #filename='a.txt'
@@ -114,6 +117,14 @@ class FtpServer:
     def rm(self):
         pass
 
+    def ls(self,params):
+        print( 'ls')
+        username=params[2]
+        filepath = os.path.join(settings.SHARE_DIR,username)
+        print(os.listdir(filepath))
+
+
+
     def login(self):
         print('waiting for login...')
         while True:
@@ -154,6 +165,7 @@ class FtpServer:
 
     def h(self,cmd):
         msg = '''
+    ls:     查看当前文件
     get:    下载
     put:    上传
     pwd:    查看当前目录
