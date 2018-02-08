@@ -4,6 +4,7 @@
 
 import paramiko,os,configparser
 from conf import settings
+import threading
 
 config = configparser.ConfigParser()
 config.read(os.path.join(settings.CONFIG_DIR,'host.ini'))
@@ -74,11 +75,19 @@ def batch_run(cmd_dic):
         else:
             host_dic[i]={'ip':config.get(i,'ip'),'username':config.get(i,'username'), \
                           'passwd': config.get(i, 'passwd')}
-
-
     shell_cmd = ' '.join(cmd_dic['-cmd'])
-    print(shell_cmd.strip('"'))
-    print(cmd_dic)
+    thread_list=[]
+    for k in host_dic:
+        host, port, username, password = host_dic[k]["ip"], host_dic[k]["port"], host_dic[k]["username"], host_dic[k][
+            "passwd"]
+        func = Remotehost(host, port, username, password, shell_cmd)  # 实例化类
+        t = threading.Thread(target=func.run)  # 创建线程
+        t.start()
+        thread_list.append(t)
+    for t in thread_list:
+        t.join()  # 等待线程执行结果
+
+
 
 def batch_scp(cmd_dic):
     group = cmd_dic['-g'][0].split(',')
@@ -103,6 +112,26 @@ def batch_scp(cmd_dic):
 def cmd_action(cmd_dic):
     return cmd_dic.get('func')(cmd_dic)
 
+class Remotehost:
+    # 远程操作主机
+    def __init__(self, host, port, username, password, cmd):
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self.cmd = cmd
+
+    def command(self):
+        # 获取命令
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # 允许连接不在know_hosts文件中的主机
+        ssh.connect(hostname=self.host, port=self.port, username=self.username, password=self.password)  # 连接服务器
+        stdin, stdout, stderr = ssh.exec_command(self.cmd)  # 获取命令结果
+        res, err = stdout.read(), stderr.read()  # 三元运算
+        result = res if res else err
+        print("[%s]".center(50, "-") % self.host)
+        print(result.decode())  # 打印输出
+        ssh.close()
 
 
 
