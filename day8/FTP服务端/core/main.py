@@ -68,45 +68,76 @@ class FtpServer:
             with open(filepath,'rb') as f:
                 for line in f:
                     self.conn.send(line)
-        # else:
-        #     headers_bytes = {}
-        #     self.conn.send(struct.pack('i', len(headers_bytes)))
 
     def put(self,params):
-        filename=params[1] #filename='a.txt'
-        filepath=os.path.join(settings.SHARE_DIR,filename) #
-        if os.path.exists(filepath):
-            print('file allready exists !')
-            return
-        # #1、制作报头
-        # headers = {
-        #     'filename': filename,
-        #     'md5': '123sxd123x123',
-        #     'filesize': os.path.getsize(filepath)
-        # }
-        #
-        # headers_json = json.dumps(headers)
-        # headers_bytes = headers_json.encode('utf-8')
-        #
-        # #2、先发报头的长度
-        # self.conn.send(struct.pack('i',len(headers_bytes)))
-        #
-        # #3、发送报头
-        # self.conn.send(headers_bytes)
-        #
-        # #4、发送真实的数据
-        # with open(filepath,'rb') as f:
-        #     for line in f:
-        #         self.conn.send(line)
+        # filename=params[1] #filename='a.txt'
+        # filepath=os.path.join(settings.SHARE_DIR,filename) #
+        # if os.path.exists(filepath):
+        #     print('file allready exists !')
+        #     return
+        # print('in get')
+        print('in put ')
+        while True:
+            # cmd=input('>>: ').strip()
+            # if not cmd:continue
+            # self.client.send(cmd.encode('utf-8'))
+            # cmd_json = json.dumps(cmd)
+            # self.client.send(cmd_json.encode('utf-8'))
+            # print('命令发送')
+            #1、先接收报头的长度
+            headers_size=struct.unpack('i',self.conn.recv(4))[0]
+            print(headers_size)
+            # if headers_size == 0:
+            #     print('文件不存在!')
+            #     break
+            # print('接受爆头长度')
+            #2、再收报头
+            # print('接受报文')
+            headers_bytes=self.conn.recv(headers_size)
+            headers_json=headers_bytes.decode('utf-8')
+            headers_dic=json.loads(headers_json)
+            # print('========>',headers_dic)
+            total_size=headers_dic['filesize']
 
-    def cd(self):
-        pass
+            #3、再收命令的结果
+            username=params[2]
+            filepath = os.path.join(settings.SHARE_DIR,username,headers_dic['filename'])
+            recv_size=0
+            data=b''
+            while recv_size < total_size:
+                recv_data=self.conn.recv(1024)
+                data+=recv_data
+                recv_size+=len(recv_data)
+                # percent = recv_size / total_size
+                # percent_json = json.dumps(percent)
+                # self.conn.send(percent_json.encode('utf-8'))
+            with open(filepath,'w') as f:
+                f.write(data.decode('utf-8'))
+            break
+        # self.client.close()
 
-    def pwd(self):
-        pass
+    def cd(self,params):
+        print('cd')
+        pname = params[2]
+        chdir = params[1]
+        p_dir=os.path.join(settings.SHARE_DIR,pname)
+        settings.filepath = os.path.join(p_dir,chdir)
+        res = json.dumps(chdir)
+        self.conn.send(res.encode('utf-8'))
 
-    def mkdir(self):
-        pass
+    def pwd(self,params):
+        print( 'pwd')
+        cc = len(os.path.join(settings.SHARE_DIR,params[1]))
+        res = json.dumps(settings.filepath[cc:])
+        self.conn.send(res.encode('utf-8'))
+
+    def mkdir(self,params):
+        print('cd')
+        pname = params[2]
+        dirname = params[1]
+        os.mkdir(os.path.join(settings.filepath,dirname))
+        res = json.dumps('创建成功')
+        self.conn.send(res.encode('utf-8'))
 
     def cp(self):
         pass
@@ -119,9 +150,10 @@ class FtpServer:
 
     def ls(self,params):
         print( 'ls')
-        username=params[2]
-        filepath = os.path.join(settings.SHARE_DIR,username)
-        print(os.listdir(filepath))
+        username=params[1]
+        # filepath = os.path.join(settings.SHARE_DIR,username)
+        res = json.dumps(os.listdir(settings.filepath))
+        self.conn.send(res.encode('utf-8'))
 
 
 
@@ -140,6 +172,7 @@ class FtpServer:
                     username = config.sections()
                     if user_dic[0] in username:
                         if user_dic[1] == config.get(user_dic[0],'passwd'):
+                            settings.filepath = os.path.join(settings.SHARE_DIR,user_dic[0])
                             res = ['1',user_dic[0]]
                             res_json = json.dumps(res)
                             res_bytes = res_json.encode('utf-8')

@@ -6,6 +6,8 @@ import os
 BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SHARE_DIR=os.path.join(BASE_DIR,'ROOT')
 DB_DIR=os.path.join(BASE_DIR,'db')
+filepath = []
+
 
 HOST = "0.0.0.0"
 PORT = 8081

@@ -38,7 +38,7 @@ class FTPClient:
                 continue
 
     def get(self,cmd):
-        print('in get',cmd)
+        # print('in get',cmd)
         while True:
             # cmd=input('>>: ').strip()
             # if not cmd:continue
@@ -68,11 +68,45 @@ class FTPClient:
                 recv_data=self.client.recv(1024)
                 data+=recv_data
                 recv_size+=len(recv_data)
-            with open(filepath,'w') as f:
-                f.write(data.decode('utf-8'))
-            print('接受成功')
+                percent = recv_size / total_size  # 接收的比例
+                self.progress(percent, width=70)  # 进度条的宽度70
+            with open(filepath,'wb') as f:
+                f.write(data)
             break
         # self.client.close()
+
+    def put(self,params):
+        print('in put')
+        cmd_json = json.dumps(params)
+        self.client.send(cmd_json.encode('utf-8'))
+        filename=params[1] #filename='a.txt'
+        filepath = os.path.join(ROOT_DIR,filename)
+        #1、制作报头
+        headers = {
+            'filename': filename,
+            'md5': '123sxd123x123',
+            'filesize': os.path.getsize(filepath)
+        }
+
+        headers_json = json.dumps(headers)
+        headers_bytes = headers_json.encode('utf-8')
+
+        #2、先发报头的长度
+        self.client.send(struct.pack('i',len(headers_bytes)))
+        # print('发送报文长度')
+        #3、发送报头
+        self.client.send(headers_bytes)
+        # print('发送报头')
+
+        #4、发送真实的数据
+        # print('发送数据')
+        with open(filepath,'rb') as f:
+            for line in f:
+                self.client.send(line)
+        print( '传输完成')
+                # ret = self.client.recv(100)
+                # percent = float(json.loads(ret.decode('utf-8')))
+                # self.progress(percent, width=70)  # 进度条的宽度70
 
     def login(self):
         while True:
@@ -101,12 +135,43 @@ class FTPClient:
         headers_dic = json.loads(ls_json)
         print(headers_dic)
 
+    def  cd(self,cmd):
+        cmd_json = json.dumps(cmd)
+        self.client.send(cmd_json.encode('utf-8'))
+        ls_bytes = self.client.recv(1024)
+        ls_json = ls_bytes.decode('utf-8')
+        headers_dic = json.loads(ls_json)
+        print(headers_dic)
+
+    def mkdir(self,cmd):
+        cmd_json = json.dumps(cmd)
+        self.client.send(cmd_json.encode('utf-8'))
+        ls_bytes = self.client.recv(1024)
+        ls_json = ls_bytes.decode('utf-8')
+        headers_dic = json.loads(ls_json)
+        print(headers_dic)
+
+    def pwd(self, cmd):
+        cmd_json = json.dumps(cmd)
+        self.client.send(cmd_json.encode('utf-8'))
+        ls_bytes = self.client.recv(1024)
+        ls_json = ls_bytes.decode('utf-8')
+        headers_dic = json.loads(ls_json)
+        print(headers_dic)
+
+    def progress(self,percent,width=50):
+        if percent >= 1:
+            percent = 1
+        show_str = ('[%%-%ds]' % width) % (int(width * percent) * '#')
+        print('\r%s %d%%' % (show_str, int(100 * percent)), file=sys.stdout, flush=True, end='')
+
     def h(self,cmd):
         print('in h')
         cmd_json = json.dumps(cmd)
         self.client.send(cmd_json.encode('utf-8'))
         recv_data = self.client.recv(1024)
-        print(recv_data.decode('utf-8'))
+        res = json.loads(recv_data.decode('utf-8'))
+        print(res)
 
 
 
