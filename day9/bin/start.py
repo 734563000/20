@@ -22,9 +22,6 @@ if __name__ == '__main__':
         if len(cmd) == 0 :
             continue
         cmd_dic = main.cmd_parse(cmd)
-        print(cmd_dic)
-        # res = ' '.join(cmd_dic['-cmd'])
-        # print(res.strip().strip('"'))
         if len(cmd_dic) == 0:
             continue
         res=main.cmd_action(cmd_dic)
