@@ -309,6 +309,7 @@ if __name__ == '__main__':#如果此程序为主入口程序
             continue
         #格式化输入语句
         sql_dic=sql_parse(sql)
+        print(sql_dic)
         #如果为空则不合法.
         if len(sql_dic) == 0:
             continue

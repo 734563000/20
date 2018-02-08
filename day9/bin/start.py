@@ -2,7 +2,8 @@
 # -*- coding:utf-8-*-
 # Author:Eio
 
-import os,sys
+import os
+import sys
 import configparser
 from core import main
 from conf import settings
@@ -22,8 +23,10 @@ if __name__ == '__main__':
             continue
         cmd_dic = main.cmd_parse(cmd)
         print(cmd_dic)
-        # if len(cmd_dic) == 0:
-        #     continue
-        # res=main.cmd_action(cmd_dic)
+        # res = ' '.join(cmd_dic['-cmd'])
+        # print(res.strip().strip('"'))
+        if len(cmd_dic) == 0:
+            continue
+        res=main.cmd_action(cmd_dic)
 
 
