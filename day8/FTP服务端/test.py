@@ -25,8 +25,15 @@
 #     For example : get a.txt
 # '''
 # print(type(msg))
+import time
+data_size=1025
+recv_size=0
+while recv_size < data_size:
+    time.sleep(0.1) #模拟数据的传输延迟
+    recv_size+=1024 #每次收1024
+
+    percent=recv_size/data_size #接收的比例
+    progress(percent,width=70) #进度条的宽度70
 
 
-
-l=['213','123']
-print(len(l))
+progress_test()
