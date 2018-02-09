@@ -4,7 +4,7 @@
 import os
 import logging
 BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-account_file=os.path.join(BASE_DIR,'db','db')
+account_file=os.path.join(BASE_DIR,'config','config')
 # account_file='db'
 LOG_PATH=os.path.join(BASE_DIR,'log','log.log')
 JYLOG_PATH=os.path.join(BASE_DIR,'log','transaction.log')

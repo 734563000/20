@@ -13,7 +13,7 @@ msg_dic=[
 ]
 creditline=15000
 shop_car=[]
-account_file='db'
+account_file='config'
 user_info={}
 error_count=0
 max_error_count=2

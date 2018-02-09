@@ -20,7 +20,7 @@ def login_required(func):
 
 #通过读取文件信息.来判断用户是否有效,如果有效返回数据
 def acc_auth(account,password):
-    with open('../db/db.json', 'r') as f:
+    with open('../config/config.json', 'r') as f:
         account_data = json.load(f)
         if account and account in account_data:
             if password == account_data[account]['password']:

@@ -28,7 +28,7 @@ while flag:
         break
     username=input('username:').strip()
     password=input('password:').strip()
-    with open('db.txt','r') as f:
+    with open('config.txt','r') as f:
         db = f.read().split('|')
     if username != db[0] or password != db[1] :
         print('username or password error!')

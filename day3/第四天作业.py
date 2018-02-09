@@ -22,7 +22,7 @@ def sql_parse(sql):
     return res
 
 def insert_parse(sql_l):
-    # insert into db.t1 values 鲁海宝,35,13910015353,测试,2005-06-27
+    # insert into config.t1 values 鲁海宝,35,13910015353,测试,2005-06-27
     '''
     sql解析分支:insert
     :param sql_l: sql按照空格分割的列表
@@ -37,7 +37,7 @@ def insert_parse(sql_l):
     return handle_parse(sql_l,sql_dic)
 
 def delete_parse(sql_l):
-    # delete from db.t1 where id=1
+    # delete from config.t1 where id=1
     '''
     sql解析分支:delete
     :param sql_l: sql按照空格分割的列表
@@ -52,7 +52,7 @@ def delete_parse(sql_l):
     return handle_parse(sql_l,sql_dic)
 
 def update_parse(sql_l):
-    # update db.t1 set id=2 where name='alex'
+    # update config.t1 set id=2 where name='alex'
     '''
     sql解析分支:update
     :param sql_l: sql按照空格分割的列表
