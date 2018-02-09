@@ -73,15 +73,17 @@ def batch_run(cmd_dic):
         if i not in res:
             print('%s 主机不存在 !'%i)
         else:
-            host_dic[i]={'ip':config.get(i,'ip'),'username':config.get(i,'username'), \
-                          'passwd': config.get(i, 'passwd')}
-    shell_cmd = ' '.join(cmd_dic['-cmd'])
+            host_dic[i]={'ip':config.get(i,'IP'),'port':config.get(i,'PORT'),'username':config.get(i,'USERNAME'), \
+                          'passwd': config.get(i, 'PASSWD')}
+    #拼接-CMD 后面的所有内容.并且去除"号
+    shell_cmd = ' '.join(cmd_dic['-cmd']).strip('"')
+    # print(shell_cmd)
     thread_list=[]
     for k in host_dic:
         host, port, username, password = host_dic[k]["ip"], host_dic[k]["port"], host_dic[k]["username"], host_dic[k][
             "passwd"]
         func = Remotehost(host, port, username, password, shell_cmd)  # 实例化类
-        t = threading.Thread(target=func.run)  # 创建线程
+        t = threading.Thread(target=func.command)  # 创建线程
         t.start()
         thread_list.append(t)
     for t in thread_list:
@@ -106,8 +108,21 @@ def batch_scp(cmd_dic):
         if i not in res:
             print('%s 主机不存在 !'%i)
         else:
-            host_dic[i]={'ip':config.get(i,'ip'),'username':config.get(i,'username'), \
-                          'passwd': config.get(i, 'passwd')}
+            host_dic[i]={'ip':config.get(i,'IP'),'port':config.get(i,'PORT'),'username':config.get(i,'USERNAME'), \
+                          'passwd': config.get(i, 'PASSWD')}
+    #拼接-CMD 后面的所有内容.并且去除"号
+    shell_cmd = [list(i) for i in zip(cmd_dic['-action'],cmd_dic['-local'],cmd_dic['-remote'])][0]
+    # print(shell_cmd[0])
+    thread_list=[]
+    for k in host_dic:
+        host, port, username, password = host_dic[k]["ip"], host_dic[k]["port"], host_dic[k]["username"], host_dic[k][
+            "passwd"]
+        func = Remotehost(host, port, username, password, shell_cmd)  # 实例化类
+        t = threading.Thread(target=func.put)  # 创建线程
+        t.start()
+        thread_list.append(t)
+    for t in thread_list:
+        t.join()  # 等待线程执行结果
 
 def cmd_action(cmd_dic):
     return cmd_dic.get('func')(cmd_dic)
@@ -133,6 +148,16 @@ class Remotehost:
         print(result.decode())  # 打印输出
         ssh.close()
 
-
+    def put(self):
+        # 上传
+        try:
+            transport = paramiko.Transport((self.host, int(self.port)))
+            transport.connect(username=self.username, password=self.password)
+            sftp = paramiko.SFTPClient.from_transport(transport)
+            sftp.put(self.cmd[1], self.cmd[2])  # 上传文件
+            transport.close()
+            print("\033[32;0m【%s】 上传 文件【%s】 成功....\033[0m" % (self.host, self.cmd[2]))
+        except Exception as error:  # 抓住异常
+            print("\033[31;0m错误:【%s】【%s】\033[0m" % (self.host, error))
 
 
