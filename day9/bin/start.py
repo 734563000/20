@@ -24,6 +24,6 @@ if __name__ == '__main__':
         cmd_dic = main.cmd_parse(cmd)
         if len(cmd_dic) == 0:
             continue
-        res=main.cmd_action(cmd_dic)
+        main.cmd_action(cmd_dic)
 
 

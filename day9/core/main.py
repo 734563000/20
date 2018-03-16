@@ -89,8 +89,6 @@ def batch_run(cmd_dic):
     for t in thread_list:
         t.join()  # 等待线程执行结果
 
-
-
 def batch_scp(cmd_dic):
     group = cmd_dic['-g'][0].split(',')
     hosts = cmd_dic['-h'][0].split(',')

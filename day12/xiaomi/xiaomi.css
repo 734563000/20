@@ -1,0 +1,45 @@
+
+
+/*通用的样式*/
+* {
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+}
+
+/*清除浮动副作用*/
+.clearfix:after {
+    content: "";
+    display: block;
+    clear:left
+}
+
+/*顶部导航栏*/
+.nav {
+    background-color: black;
+}
+
+ul.nav-left>li {
+    float: left;
+    list-style-type: none;
+    padding: 15px;
+}
+ul.nav-rigth>li {
+    float: right;
+    list-style-type: none;
+    padding: 15px;
+}
+ul a {
+    color: darkgray;
+}
+ul a:hover {
+    color: white;
+}
+
+.container {
+    width:80%;
+    margin: 0 auto;
+}
