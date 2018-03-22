@@ -10,6 +10,17 @@ a {
     text-decoration: none;
 }
 
+ul {
+    list-style-type: none;
+}
+
+.fl {
+    float: left;
+}
+
+.fr {
+    float: right;
+}
 /*清除浮动副作用*/
 .clearfix:after {
     content: "";
@@ -24,24 +35,103 @@ a {
 /*浮动*/
 ul.nav-left>li {
     float: left;
-    list-style-type: none;
     padding: 15px;
 }
 ul.nav-rigth>li {
     float: right;
-    list-style-type: none;
     padding: 15px;
 }
 /*变色*/
-ul a {
+.nav a {
     color: darkgray;
 }
-ul a:hover {
+.nav a:hover {
     color: white;
 }
-/*80%缩进*/
+/*90%缩进*/
 .container {
-    width:80%;
+    width:1226px;
     margin: 0 auto;
 }
 
+/*search*/
+#button1{
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    color: #616161;
+}
+
+.search a {
+    color: black;
+}
+
+.search a:hover{
+    color: tomato;
+}
+
+ul.search-left>li {
+    /*line-height: 55px;*/
+    float: left;
+    padding: 15px;
+}
+.search-right {
+    background-color: white;
+    float: right;
+    padding: 15px;
+}
+
+.search-right {
+    width: 300px;
+}
+.search-right input{
+    border: 1px solid black;
+    outline: 0;
+}
+
+.search-right input[type="text"] {
+    width: 80%;
+    height: 23px;
+    font-size: 30px;
+}
+.search-right input[type="button"] {
+    width: 17%;
+    height: 23px;
+}
+
+
+
+/*左侧菜单样式*/
+.left-menu{
+    width:234px;
+    background-color: darkblue;
+    padding: 15px 0;
+    height: 430px;
+}
+.left-menu ul{
+    margin: 10px 0;
+}
+.left-menu a{
+    color: white;
+}
+.left-menu li {
+    padding: 9px 0 9px 25px;
+}
+.left-menu li:hover{
+    background-color: tomato;
+}
+
+/*推广区*/
+.push-ad{
+    margin-top:20px;
+}
+
+.flush-items a {
+    margin: 3.7px;
+}
+.flush-items {
+    margin-top: 15px;
+}
+
+.flush-sale {
+    margin-top:15px;
+}
